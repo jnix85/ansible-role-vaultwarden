@@ -1,0 +1,56 @@
+---
+# SPDX-License-Identifier: MIT
+- name: Assert Caddy email is set when managing Caddy
+  ansible.builtin.assert:
+    that:
+      - vaultwarden_caddy_email is defined and vaultwarden_caddy_email | length > 0
+    fail_msg: "vaultwarden_caddy_email must be set when vaultwarden_manage_caddy is true"
+
+- name: Install Caddy prerequisites (Debian/Ubuntu)
+  when: ansible_os_family == "Debian"
+  block:
+    - name: Install prerequisite packages
+      ansible.builtin.apt:
+        name:
+          - debian-keyring
+          - debian-archive-keyring
+          - apt-transport-https
+          - curl
+          - gnupg
+        state: present
+        update_cache: true
+
+    - name: Add Caddy GPG key
+      ansible.builtin.get_url:
+        url: "https://dl.cloudsmith.io/public/caddy/stable/gpg.key"
+        dest: /etc/apt/keyrings/caddy-stable.asc
+        mode: "0644"
+
+    - name: Add Caddy apt repository
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [signed-by=/etc/apt/keyrings/caddy-stable.asc]
+          https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main
+        state: present
+        filename: caddy-stable
+
+    - name: Install Caddy
+      ansible.builtin.apt:
+        name: caddy
+        state: present
+        update_cache: true
+
+- name: Deploy Caddyfile
+  ansible.builtin.template:
+    src: Caddyfile.j2
+    dest: /etc/caddy/Caddyfile
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload caddy
+
+- name: Ensure Caddy is started and enabled
+  ansible.builtin.service:
+    name: caddy
+    state: started
+    enabled: true

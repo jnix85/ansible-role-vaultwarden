@@ -1,0 +1,14 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  tasks:
+    - name: Check Vaultwarden container is running
+      community.docker.docker_container_info:
+        name: vaultwarden
+      register: vaultwarden_info
+
+    - name: Assert container is running
+      ansible.builtin.assert:
+        that:
+          - vaultwarden_info.container.State.Status == "running"

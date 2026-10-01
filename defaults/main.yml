@@ -1,0 +1,60 @@
+---
+# SPDX-License-Identifier: MIT
+# Docker
+vaultwarden_manage_docker: true
+vaultwarden_docker_compose_plugin: true
+
+# Image
+vaultwarden_image: "vaultwarden/server"
+vaultwarden_image_tag: "latest"
+vaultwarden_container_name: "vaultwarden"
+vaultwarden_restart_policy: "unless-stopped"
+
+# Filesystem
+vaultwarden_data_dir: "/opt/vaultwarden/data"
+vaultwarden_data_dir_owner: "root"
+vaultwarden_data_dir_group: "root"
+vaultwarden_data_dir_mode: "0750"
+
+# Networking
+vaultwarden_http_bind_address: "127.0.0.1"
+vaultwarden_http_port: 8080
+vaultwarden_websocket_enabled: true
+vaultwarden_websocket_bind_address: "127.0.0.1"
+vaultwarden_websocket_port: 3012
+
+# Core Vaultwarden config (mapped to env vars)
+vaultwarden_domain: "https://vault.example.com"
+vaultwarden_signups_allowed: false
+vaultwarden_signups_verify: true
+vaultwarden_invitations_allowed: true
+vaultwarden_admin_token: ""     # set via vault; blank disables /admin
+vaultwarden_log_level: "warn"
+vaultwarden_show_password_hint: false
+vaultwarden_sends_allowed: true
+vaultwarden_emergency_access_allowed: true
+vaultwarden_password_iterations: 600000
+
+# SMTP (leave vaultwarden_smtp_host blank to disable mail)
+vaultwarden_smtp_host: ""
+vaultwarden_smtp_port: 587
+vaultwarden_smtp_security: "starttls"   # starttls | force_tls | "off"
+vaultwarden_smtp_from: ""
+vaultwarden_smtp_from_name: "Vaultwarden"
+vaultwarden_smtp_username: ""
+vaultwarden_smtp_password: ""
+
+# Free-form extra environment variables, merged in last (takes precedence)
+# e.g. vaultwarden_extra_env: { YUBICO_CLIENT_ID: "..." }
+vaultwarden_extra_env: {}
+
+# Backups
+vaultwarden_backup_enabled: true
+vaultwarden_backup_dir: "/opt/vaultwarden/backups"
+vaultwarden_backup_retention_days: 14
+vaultwarden_backup_hour: 3
+vaultwarden_backup_minute: 30
+
+# Optional reverse proxy (Caddy) with automatic HTTPS
+vaultwarden_manage_caddy: false
+vaultwarden_caddy_email: ""

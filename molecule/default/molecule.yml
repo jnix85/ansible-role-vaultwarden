@@ -1,0 +1,23 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+platforms:
+  - name: vaultwarden-instance
+    image: "geerlingguy/docker-ubuntu2204-ansible:latest"
+    command: ""
+    privileged: true
+    cgroupns_mode: host
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    pre_build_image: true
+provisioner:
+  name: ansible
+  inventory:
+    host_vars:
+      vaultwarden-instance:
+        vaultwarden_domain: "https://vault.molecule.test"
+        vaultwarden_admin_token: "molecule-test-token"
+verifier:
+  name: ansible

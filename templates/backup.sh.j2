@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# {{ ansible_managed }}
+set -euo pipefail
+
+DATA_DIR="{{ vaultwarden_data_dir }}"
+BACKUP_DIR="{{ vaultwarden_backup_dir }}"
+RETENTION_DAYS="{{ vaultwarden_backup_retention_days }}"
+TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
+ARCHIVE="${BACKUP_DIR}/vaultwarden-${TIMESTAMP}.tar.gz"
+
+tar --create --gzip --file "${ARCHIVE}" -C "$(dirname "${DATA_DIR}")" "$(basename "${DATA_DIR}")"
+
+find "${BACKUP_DIR}" -name 'vaultwarden-*.tar.gz' -mtime "+${RETENTION_DAYS}" -delete

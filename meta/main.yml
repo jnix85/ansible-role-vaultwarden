@@ -1,0 +1,30 @@
+---
+galaxy_info:
+  role_name: vaultwarden
+  namespace: jparks
+  author: Jason Parks
+  description: Deploy Vaultwarden (Bitwarden-compatible server) via Docker
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+  galaxy_tags:
+    - vaultwarden
+    - bitwarden
+    - docker
+    - security
+    - password-manager
+
+dependencies: []

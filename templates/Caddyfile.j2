@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+{
+	email {{ vaultwarden_caddy_email }}
+}
+
+{{ vaultwarden_domain | regex_replace('^https?://', '') }} {
+{% if vaultwarden_websocket_enabled %}
+	reverse_proxy /notifications/hub {{ vaultwarden_websocket_bind_address }}:{{ vaultwarden_websocket_port }}
+{% endif %}
+	reverse_proxy {{ vaultwarden_http_bind_address }}:{{ vaultwarden_http_port }}
+
+	encode gzip
+}

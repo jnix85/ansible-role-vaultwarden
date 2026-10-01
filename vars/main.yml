@@ -1,0 +1,5 @@
+---
+# SPDX-License-Identifier: MIT
+# Internal, non-overridable-by-design variables (constants for this role).
+vaultwarden_internal_http_port: 80
+vaultwarden_internal_ws_port: 3012

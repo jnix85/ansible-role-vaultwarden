@@ -1,0 +1,8 @@
+---
+- name: Test ansible-role-vaultwarden
+  hosts: localhost
+  become: true
+  roles:
+    - role: ansible-role-vaultwarden
+      vaultwarden_domain: "https://vault.test.local"
+      vaultwarden_admin_token: "test-token"

@@ -1,0 +1,30 @@
+---
+# SPDX-License-Identifier: MIT
+- name: Assert required variables are sane
+  ansible.builtin.assert:
+    that:
+      - vaultwarden_domain is defined and vaultwarden_domain | length > 0
+      - vaultwarden_data_dir is defined and vaultwarden_data_dir | length > 0
+    fail_msg: "vaultwarden_domain and vaultwarden_data_dir must be set"
+
+- name: Warn if admin token is unset
+  ansible.builtin.debug:
+    msg: >-
+      vaultwarden_admin_token is empty; the /admin panel will be disabled.
+      Set it (ideally via ansible-vault) if you need admin access.
+  when: not vaultwarden_admin_token
+
+- name: Include Docker installation tasks
+  ansible.builtin.include_tasks: docker.yml
+  when: vaultwarden_manage_docker
+
+- name: Include Vaultwarden deployment tasks
+  ansible.builtin.include_tasks: deploy.yml
+
+- name: Include backup tasks
+  ansible.builtin.include_tasks: backup.yml
+  when: vaultwarden_backup_enabled
+
+- name: Include Caddy reverse proxy tasks
+  ansible.builtin.include_tasks: caddy.yml
+  when: vaultwarden_manage_caddy

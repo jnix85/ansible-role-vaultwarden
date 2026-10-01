@@ -1,0 +1,63 @@
+---
+# SPDX-License-Identifier: MIT
+- name: Create Vaultwarden data directory
+  ansible.builtin.file:
+    path: "{{ vaultwarden_data_dir }}"
+    state: directory
+    owner: "{{ vaultwarden_data_dir_owner }}"
+    group: "{{ vaultwarden_data_dir_group }}"
+    mode: "{{ vaultwarden_data_dir_mode }}"
+
+- name: Build Vaultwarden environment
+  ansible.builtin.set_fact:
+    vaultwarden_env: >-
+      {{
+        {
+          'DOMAIN': vaultwarden_domain,
+          'SIGNUPS_ALLOWED': vaultwarden_signups_allowed | string | lower,
+          'SIGNUPS_VERIFY': vaultwarden_signups_verify | string | lower,
+          'INVITATIONS_ALLOWED': vaultwarden_invitations_allowed | string | lower,
+          'LOG_LEVEL': vaultwarden_log_level,
+          'SHOW_PASSWORD_HINT': vaultwarden_show_password_hint | string | lower,
+          'SENDS_ALLOWED': vaultwarden_sends_allowed | string | lower,
+          'EMERGENCY_ACCESS_ALLOWED': vaultwarden_emergency_access_allowed | string | lower,
+          'PASSWORD_ITERATIONS': vaultwarden_password_iterations | string,
+          'WEBSOCKET_ENABLED': vaultwarden_websocket_enabled | string | lower,
+        }
+        | combine({'ADMIN_TOKEN': vaultwarden_admin_token} if vaultwarden_admin_token else {})
+        | combine({
+            'SMTP_HOST': vaultwarden_smtp_host,
+            'SMTP_PORT': vaultwarden_smtp_port | string,
+            'SMTP_SECURITY': vaultwarden_smtp_security,
+            'SMTP_FROM': vaultwarden_smtp_from,
+            'SMTP_FROM_NAME': vaultwarden_smtp_from_name,
+            'SMTP_USERNAME': vaultwarden_smtp_username,
+            'SMTP_PASSWORD': vaultwarden_smtp_password,
+          } if vaultwarden_smtp_host else {})
+        | combine(vaultwarden_extra_env)
+      }}
+  no_log: "{{ not (vaultwarden_show_secrets_in_log | default(false)) }}"
+
+- name: Build Vaultwarden published ports
+  ansible.builtin.set_fact:
+    vaultwarden_published_ports: >-
+      {{
+        [vaultwarden_http_bind_address ~ ':' ~ vaultwarden_http_port ~ ':' ~ vaultwarden_internal_http_port]
+        + ([vaultwarden_websocket_bind_address ~ ':' ~ vaultwarden_websocket_port ~ ':' ~ vaultwarden_internal_ws_port] if vaultwarden_websocket_enabled else [])
+      }}
+
+- name: Pull and run the Vaultwarden container
+  community.docker.docker_container:
+    name: "{{ vaultwarden_container_name }}"
+    image: "{{ vaultwarden_image }}:{{ vaultwarden_image_tag }}"
+    state: started
+    restart_policy: "{{ vaultwarden_restart_policy }}"
+    pull: true
+    env: "{{ vaultwarden_env }}"
+    ports: "{{ vaultwarden_published_ports }}"
+    volumes:
+      - "{{ vaultwarden_data_dir }}:/data"
+    comparisons:
+      env: strict
+      image: strict
+  no_log: "{{ not (vaultwarden_show_secrets_in_log | default(false)) }}"
